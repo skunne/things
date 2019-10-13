@@ -1,4 +1,3 @@
-usage: main.py [-h] [--src SRC] [--tgt TGT]
 
 Register two images by clicking on points in both images.
 
@@ -7,6 +6,8 @@ commands:
   CLICK        Add point
   ENTER        Register the images
   BACKSPACE    Reset all points.
+
+usage: main.py [-h] [--src SRC] [--tgt TGT]
 
 optional arguments:
   -h, --help  show this help message and exit

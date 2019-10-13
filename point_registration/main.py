@@ -2,6 +2,7 @@
 
 import sys			# sys.exit()
 import pygame		# handle pygame events: interaction with user
+from time import sleep	# because infinite loops make my computer overheat
 
 import reg_args		# parse arguments
 import reg_transfo	# calculate and apply transformation
@@ -25,6 +26,7 @@ src_img_name, tgt_img_name = reg_args.parse_args()
 sourcepoints, targetpoints = reg_io.reset(screen, source_img, leftrect, target_img, rightrect)
 
 while True:
+	sleep(0.05)
 	for event in pygame.event.get():
 		# PRESS ESCAPE: QUIT
 		if event.type == pygame.QUIT or (event.type==pygame.KEYDOWN and event.key == pygame.K_ESCAPE):

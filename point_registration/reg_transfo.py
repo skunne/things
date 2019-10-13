@@ -68,13 +68,16 @@ def apply(m, t, srcimg, imgwidth, imgheight):
 	square_invert_transfo = np.linalg.inv(square_transfo)
 	rectangle_invert_transfo = square_invert_transfo.flatten()[:6]
 	(a,c,t0,b,d,t1) = rectangle_invert_transfo
+	#det = a*d-b*c
+	#(a,b,c,d) = (d/det, -b/det, c/det, a/det)
+	#(t0,t1) = (-a*t0-c*t1, -b*t0-d*t1)
 	print('inverse transfo:')
 	print('  ', a, ' ', c, '  ', t0)
 	print('  ', b, ' ', d, '  ', t1)
 	newpilimg = pilimg.transform(
 		(1000,1000),
 		Image.AFFINE,
-		data=rectangle_invert_transfo,
+		data=rectangle_invert_transfo,#(a,c,t0,b,d,t1), #rectangle_invert_transfo,
 		resample=Image.BICUBIC
 	)
 	newtxt = newpilimg.tobytes()

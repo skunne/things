@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 
-import pygame
+import sys			# sys.exit()
+import pygame		# handle pygame events: interaction with user
 
-import reg_args
-import reg_transfo
-import reg_io
+import reg_args		# parse arguments
+import reg_transfo	# calculate and apply transformation
+import reg_io		# display images to screen
 
-source_img, target_img = reg_args.parse_args()
+# parse arguments and get filenames for two images
+src_img_name, tgt_img_name = reg_args.parse_args()
 
+# init screen and everything pygame-related
 (
 	size, width, height,
 	screen,
 	source_img,
 	imgwidth, imgheight,
 	target_img, reg_img,
+	reg_img,
 	leftrect, rightrect, regrect
-) = reg_io.init()
+) = reg_io.init(src_img_name, tgt_img_name)
 
+# display images
 sourcepoints, targetpoints = reg_io.reset(screen, source_img, leftrect, target_img, rightrect)
 
 while True:

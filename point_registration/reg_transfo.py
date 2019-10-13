@@ -4,6 +4,7 @@ import math			# solve trig equation
 from PIL import Image	# apply transfo to image
 import pygame.image		# apply transfo to image
 
+# calculate transformation given point list x and its image y
 def calculate(x, y):
 	if len(x) == 0:
 		# no point: identity matrix and null translation
@@ -57,6 +58,7 @@ def calculate(x, y):
 		# t1 = y[0][1] - d * x[0][1] - b * x[0][0]
 	return ((a,b,c,d), (t0, t1))
 
+# apply transformation f(x) = m x + t to source image
 def apply(m, t, srcimg, imgwidth, imgheight):
 	(a,b,c,d), (t0,t1) = m, t
 	srctxt = pygame.image.tostring(srcimg, 'RGBA')
@@ -79,6 +81,7 @@ def apply(m, t, srcimg, imgwidth, imgheight):
 	newimg = pygame.image.fromstring(newtxt, (1000,1000),'RGBA')
 	return newimg
 
+# print numerical values of registered points
 def print_points(m, t, X, Y):
 	(a,b,c,d), (t0,t1) = m, t
 	print('checking transfo:')

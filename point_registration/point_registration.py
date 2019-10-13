@@ -17,7 +17,7 @@ black = 0, 0, 0
 
 screen = pygame.display.set_mode(size)
 
-source_img = pygame.image.load("img/Coeur-190615.jpg")
+source_img = pygame.image.load("img/coeur.png")
 imgwidth, imgheight = source_img.get_rect().size
 target_img = pygame.image.load("img/640x410_coeligur-anti-stress-donneur.jpg")
 reg_img = source_img.copy()
@@ -45,16 +45,15 @@ def calculate_transfo(x, y):
 		a,b,c,d = (1,0,0,1) # identity matrix
 	elif len(x) == 2:
 		# two points: translation + rotation,dilation centered on first point
-		t0, t1 = y[0][0] - x[0][0], y[0][1] - x[0][1]
 		x0, x1 = x[1][0] - x[0][0], x[1][1] - x[0][1]
 		y0, y1 = y[1][0] - y[0][0], y[1][1] - y[0][1]
 		r = math.sqrt( (y0 * y0 + y1 * y1) / (x0 * x0 + x1 * x1) )
-		alpha = math.atan2(y[1][0], y[1][1]) - math.atan2(x[1][0], x[1][1])
+		alpha = - math.atan2(y0, y1) + math.atan2(x0, x1)
 		rcosa = r * math.cos(alpha)
 		rsina = r * math.sin(alpha)
 		a, b, c, d = (rcosa, rsina, -rsina, rcosa)
-		t0 = t0 - (a * x[0][0] + c * x[0][1])
-		t1 = t1 - (b * x[0][0] + d * x[0][1])
+		t0 = y[0][0] - (a * x[0][0] + c * x[0][1])
+		t1 = y[0][1] - (b * x[0][0] + d * x[0][1])
 		# # two points: add condition (a b c d) x[0] + t = x[0] + t
 		# #   solve for a,c,t0
 		# t0 = y[0][0] - x[0][0]
@@ -114,7 +113,7 @@ def apply_transfo(m, t, srcimg):
 def check_if_transfo_is_correct(m, t, X, Y):
 	(a,b,c,d), (t0,t1) = m, t
 	print('checking transfo:')
-	print('  ', 'x0', '   ', 'x1', '   ', 'z0', '   ', 'z1', '   ', 'y0', '   ', 'y1', '   ')
+	print('   ', 'x0', '   ', 'x1', '    ', 'z0', '    ', 'z1', '    ', 'y0', '   ', 'y1', '    ')
 	for (x0,x1),(y0,y1) in zip(X,Y):
 		z0 = a * x0 + c * x1 + t0
 		z1 = b * x0 + d * x1 + t1
@@ -168,6 +167,7 @@ while True:
 			print('  ', a, ' ', c, '  ', t0)
 			print('  ', b, ' ', d, '  ', t1)
 			check_if_transfo_is_correct(rotation, translation, sourcepoints, targetpoints)
+			del reg_img
 			reg_img = apply_transfo(rotation, translation, source_img)
 			screen.fill(black)
 			screen.blit(source_img, leftrect)

@@ -7,7 +7,8 @@ from PIL import Image
 import sys			# sys.exit()
 import pygame		# user interaction
 
-import numpy as np	# matrix inversion
+import numpy as np	# solve lin system of equations
+import math			# trigonometry
 
 pygame.init()
 
@@ -36,28 +37,35 @@ s0,s1 = 10000,10000
 def calculate_transfo(x, y):
 	if len(x) == 0:
 		# no point: identity matrix and null translation
-		return ((1,0,0,1), (0,0))
+		((a,b,c,d), (t0, t1)) = ((1,0,0,1), (0,0))
 	elif len(x) == 1:
 		# one point: just a translation
 		t0 = y[0][0] - x[0][0]
 		t1 = y[0][1] - x[0][1]
 		a,b,c,d = (1,0,0,1) # identity matrix
 	elif len(x) == 2:
-		# two points: add condition (a b c d) x[0] + t = x[0] + t
-		#   solve for a,c,t0
-		t0 = y[0][0] - x[0][0]
-		c = (y[1][0] - t0 - x[1][0]) / (x[1][1] - (x[1][0]*x[0][1])/x[0][0])
-		a = 1 - (c * x[0][1] / x[0][0])
-		#   solve for b, d, t1
-		t1 = y[0][1] - x[0][1]
-		b = (y[1][1]-y[0][1]+x[0][1]-x[1][1]) / (x[1][0] - (x[0][0]*x[1][1])/x[0][1])
-		d = 1 - (b * x[0][0]) / x[0][1]
+		# two points: translation + rotation,dilation centered on first point
+		t0, t1 = y[0][0] - x[0][0], y[0][1] - x[0][1]
+		x0, x1 = x[1][0] - x[0][0], x[1][1] - x[0][1]
+		y0, y1 = y[1][0] - y[0][0], y[1][1] - y[0][1]
+		r = math.sqrt( (y0 * y0 + y1 * y1) / (x0 * x0 + x1 * x1) )
+		alpha = math.atan2(y[1][0], y[1][1]) - math.atan2(x[1][0], x[1][1])
+		rcosa = r * math.cos(alpha)
+		rsina = r * math.sin(alpha)
+		a, b, c, d = (rcosa, rsina, -rsina, rcosa)
+		t0 = t0 - (a * x[0][0] + c * x[0][1])
+		t1 = t1 - (b * x[0][0] + d * x[0][1])
+		# # two points: add condition (a b c d) x[0] + t = x[0] + t
+		# #   solve for a,c,t0
+		# t0 = y[0][0] - x[0][0]
+		# c = (y[1][0] - t0 - x[1][0]) / (x[1][1] - (x[1][0]*x[0][1])/x[0][0])
+		# a = 1 - (c * x[0][1] / x[0][0])
+		# #   solve for b, d, t1
+		# t1 = y[0][1] - x[0][1]
+		# b = (y[1][1]-y[0][1]+x[0][1]-x[1][1]) / (x[1][0] - (x[0][0]*x[1][1])/x[0][1])
+		# d = 1 - (b * x[0][0]) / x[0][1]
 	elif len(x) >= 3:
-		# three points: solve system exactly using only first three points
-		print('x')
-		print(x)
-		print('y')
-		print(y)
+		# three points: affine transformation, solve system using first three points
 		y = np.array(y[:3])
 		x = np.concatenate((np.array(x[:3]), np.array([[1],[1],[1]])), axis=1)
 		bdt = np.linalg.solve(x, y[:,1])
@@ -160,7 +168,7 @@ while True:
 			print('  ', a, ' ', c, '  ', t0)
 			print('  ', b, ' ', d, '  ', t1)
 			check_if_transfo_is_correct(rotation, translation, sourcepoints, targetpoints)
-			reg_img = apply_transfo(rotation, translation, reg_img)
+			reg_img = apply_transfo(rotation, translation, source_img)
 			screen.fill(black)
 			screen.blit(source_img, leftrect)
 			screen.blit(target_img, rightrect)

@@ -64,7 +64,10 @@ def calculate_best_affine(x, y):
 	(a,b,c,d,t0,t1) = reg.coef_
 	return ((a,b,c,d), (t0, t1))
 
-
+def calculate_icp(x,y):
+	print('NOT IMPLEMENTED YET')
+	assert(False), 'ICP algorithm not implemented yet'
+	return ((1,0,0,1), (0,0))
 
 # calculate transformation given point list x and its image y
 def calculate(x, y, args):

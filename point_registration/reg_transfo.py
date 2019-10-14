@@ -1,30 +1,22 @@
 import numpy as np	# solve lin equation
 import math			# solve trig equation
+from sklearn.linear_model import LinearRegression 	# regression
 
 from PIL import Image	# apply transfo to image
 import pygame.image		# apply transfo to image
 
-# calculate transformation given point list x and its image y
-def calculate(x, y):
-	if len(x) == 0:
-		# no point: identity matrix and null translation
-		((a,b,c,d), (t0, t1)) = ((1,0,0,1), (0,0))
-	elif len(x) == 1:
-		# one point: just a translation
-		t0 = y[0][0] - x[0][0]
-		t1 = y[0][1] - x[0][1]
-		a,b,c,d = (1,0,0,1) # identity matrix
-	elif len(x) == 2:
-		# two points: translation + rotation,dilation centered on first point
-		x0, x1 = x[1][0] - x[0][0], x[1][1] - x[0][1]
-		y0, y1 = y[1][0] - y[0][0], y[1][1] - y[0][1]
-		r = math.sqrt( (y0 * y0 + y1 * y1) / (x0 * x0 + x1 * x1) )
-		alpha = - math.atan2(y0, y1) + math.atan2(x0, x1)
-		rcosa = r * math.cos(alpha)
-		rsina = r * math.sin(alpha)
-		a, b, c, d = (rcosa, rsina, -rsina, rcosa)
-		t0 = y[0][0] - (a * x[0][0] + c * x[0][1])
-		t1 = y[0][1] - (b * x[0][0] + d * x[0][1])
+def calculate_similitude(x,y):
+	# two points: translation + rotation,dilation centered on first point
+	x0, x1 = x[1][0] - x[0][0], x[1][1] - x[0][1]
+	y0, y1 = y[1][0] - y[0][0], y[1][1] - y[0][1]
+	r = math.sqrt( (y0 * y0 + y1 * y1) / (x0 * x0 + x1 * x1) )
+	alpha = - math.atan2(y0, y1) + math.atan2(x0, x1)
+	rcosa = r * math.cos(alpha)
+	rsina = r * math.sin(alpha)
+	a, b, c, d = (rcosa, rsina, -rsina, rcosa)
+	t0 = y[0][0] - (a * x[0][0] + c * x[0][1])
+	t1 = y[0][1] - (b * x[0][0] + d * x[0][1])
+	return ((a,b,c,d), (t0, t1))
 		# # two points: add condition (a b c d) x[0] + t = x[0] + t
 		# #   solve for a,c,t0
 		# t0 = y[0][0] - x[0][0]
@@ -34,14 +26,16 @@ def calculate(x, y):
 		# t1 = y[0][1] - x[0][1]
 		# b = (y[1][1]-y[0][1]+x[0][1]-x[1][1]) / (x[1][0] - (x[0][0]*x[1][1])/x[0][1])
 		# d = 1 - (b * x[0][0]) / x[0][1]
-	elif len(x) >= 3:
-		# three points: affine transformation, solve system using first three points
-		y = np.array(y[:3])
-		x = np.concatenate((np.array(x[:3]), np.array([[1],[1],[1]])), axis=1)
-		bdt = np.linalg.solve(x, y[:,1])
-		act = np.linalg.solve(x, y[:,0])
-		b,d,t1 = bdt[0], bdt[1], bdt[2]
-		a,c,t0 = act[0], act[1], act[2]
+
+def calculate_exact_affine(x, y):
+	# three points: affine transformation, solve system using first three points
+	y = np.array(y[:3])
+	x = np.concatenate((np.array(x[:3]), np.array([[1],[1],[1]])), axis=1)
+	bdt = np.linalg.solve(x, y[:,1])
+	act = np.linalg.solve(x, y[:,0])
+	b,d,t1 = bdt[0], bdt[1], bdt[2]
+	a,c,t0 = act[0], act[1], act[2]
+	return ((a,b,c,d), (t0, t1))
 		# #   solve for a,c,t0
 		# crh = (y[2][0] - y[0][0] - ((x[2][0]-x[0][0])*(y[1][0]-y[2][0]))/(x[1][0]-x[0][0]))
 		# clh = x[2][1] - x[0][1] - ((x[2][0]-x[0][0])*(x[1][1]-x[0][1]))/(x[1][0]-x[0][0])
@@ -56,6 +50,46 @@ def calculate(x, y):
 		# blh = (x[2][1]-x[0][1])*(x[1][0]-x[0][0]) - (x[1][1]-x[0][1])*(x[2][0]-x[0][1])
 		# b = brh / blh
 		# t1 = y[0][1] - d * x[0][1] - b * x[0][0]
+
+def calculate_best_affine(x, y):
+	print(x)
+	print(y)
+	a, b = [], []
+	for ((x0, x1), (y0, y1)) in zip(x, y):
+		a.append([x0, 0, x1, 0, 1, 0])
+		a.append([0, x0, 0, x1, 0, 1])
+		b.append(y0)
+		b.append(y1)
+	reg = LinearRegression(fit_intercept=False).fit(np.array(a), np.array(b))
+	(a,b,c,d,t0,t1) = reg.coef_
+	return ((a,b,c,d), (t0, t1))
+
+
+
+# calculate transformation given point list x and its image y
+def calculate(x, y):
+	if len(x) == 0:
+		# no point: identity matrix and null translation
+		((a,b,c,d), (t0, t1)) = ((1,0,0,1), (0,0))
+
+	elif len(x) == 1:
+		# one point: just a translation
+		t0 = y[0][0] - x[0][0]
+		t1 = y[0][1] - x[0][1]
+		a,b,c,d = (1,0,0,1) # identity matrix
+
+	elif len(x) == 2:
+		# two points: translation + rotation,dilation centered on first point
+		((a,b,c,d), (t0, t1)) = calculate_similitude(x,y)
+
+	elif len(x) == 3:
+		# three points: affine transformation, solve system using first three points
+		((a,b,c,d), (t0, t1)) = calculate_exact_affine(x,y)
+
+	elif len(x) > 3:
+		# more than three points: affine using linear regression
+		((a,b,c,d), (t0, t1)) = calculate_best_affine(x,y)
+
 	return ((a,b,c,d), (t0, t1))
 
 # apply transformation f(x) = m x + t to source image

@@ -67,10 +67,14 @@ def calculate_best_affine(x, y):
 
 
 # calculate transformation given point list x and its image y
-def calculate(x, y):
-	if len(x) == 0:
+def calculate(x, y, args):
+	if len(x) == 0 or len(y) == 0:
 		# no point: identity matrix and null translation
 		((a,b,c,d), (t0, t1)) = ((1,0,0,1), (0,0))
+
+	elif args.icp:
+		# run icp algorithm
+		((a,b,c,d), (t0, t1)) = calculate_icp(x, y)
 
 	elif len(x) == 1:
 		# one point: just a translation
@@ -78,13 +82,13 @@ def calculate(x, y):
 		t1 = y[0][1] - x[0][1]
 		a,b,c,d = (1,0,0,1) # identity matrix
 
-	elif len(x) == 2:
-		# two points: translation + rotation,dilation centered on first point
-		((a,b,c,d), (t0, t1)) = calculate_similitude(x,y)
+	elif len(x) == 2 or args.similitude:
+		# two points: translation + rotation + dilation using last two points
+		((a,b,c,d), (t0, t1)) = calculate_similitude(x[-2:],y[-2:])
 
-	elif len(x) == 3:
-		# three points: affine transformation, solve system using first three points
-		((a,b,c,d), (t0, t1)) = calculate_exact_affine(x,y)
+	elif len(x) == 3 or args.exact_affine:
+		# three points: affine transformation, solve system using last three points
+		((a,b,c,d), (t0, t1)) = calculate_exact_affine(x[-3:],y[-3:])
 
 	elif len(x) > 3:
 		# more than three points: affine using linear regression

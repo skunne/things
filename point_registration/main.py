@@ -9,7 +9,7 @@ import reg_transfo	# calculate and apply transformation
 import reg_io		# display images to screen
 
 # parse arguments and get filenames for two images
-src_img_name, tgt_img_name = reg_args.parse_args()
+src_img_name, tgt_img_name, args = reg_args.parse_args()
 
 # init screen and everything pygame-related
 (
@@ -36,6 +36,10 @@ while True:
 		elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
 			sourcepoints, targetpoints = reg_io.reset(screen, source_img, leftrect, target_img, rightrect)
 
+		# PRESS DEL: RESET POINTS BUT NOT REGISTRATION
+		elif event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
+			sourcepoints, targetpoints = [], []
+
 		# CLICK: ADD POINT
 		elif event.type == pygame.MOUSEBUTTONUP:
 			#x, y = event.pos[0] + s0, event.pos[1] + s1
@@ -48,11 +52,11 @@ while True:
 				targetpoints.append((x,y))
 
 		# PRESS ENTER: REGISTER IMAGES
-		elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RETURN) and len(sourcepoints) == len(targetpoints):
+		elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RETURN) and (len(sourcepoints) == len(targetpoints) or args.icp):
 			print('points:')
 			for (x0,x1),(y0,y1) in zip(sourcepoints, targetpoints):
 				print('  ', x0,x1,' -> ',y0,y1)
-			rotation,translation = reg_transfo.calculate(sourcepoints, targetpoints)
+			rotation,translation = reg_transfo.calculate(sourcepoints, targetpoints, args)
 			(a,b,c,d), (t0, t1) = rotation, translation
 			print('transfo:')
 			print('  ', a, ' ', c, '  ', t0)

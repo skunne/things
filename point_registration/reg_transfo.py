@@ -66,7 +66,7 @@ def calculate_best_affine(x, y):
 
 def calculate_icp(x,y):
 	print('NOT IMPLEMENTED YET')
-	assert(False), 'ICP algorithm not implemented yet'
+	assert('is ICP implemented?'=="no it isn't"), 'ICP algorithm not implemented yet'
 	return ((1,0,0,1), (0,0))
 
 # calculate transformation given point list x and its image y

@@ -1,6 +1,6 @@
 from PIL import Image
 from functools import reduce 	# sum list of tuples
-import math		# pi, cos, sin
+#import math		# pi, cos, sin
 import sys		# sys.argv
 
 if len(sys.argv) >= 3:
@@ -57,27 +57,45 @@ def get_ray(x0,y0, x1,y1):
 		return get_ray_with_assumption(x0,y0, x1,y1, stepy)
 
 
-def get_rays(k, num_proj, alpha):
-	if k <= (num_proj + 1) / 4:
-		wsina = int((width-1) * math.sin(alpha))
-		(x0,y0) = (0, - wsina)
-		(x1,y1) = (width-1,0)
-		return [get_ray(x0,y0+j,x1,y1+j) for j in range(height+wsina)]
-	elif k <= (num_proj +1) / 2:
-		wcosa = int((width-1) * math.cos(alpha))
-		(x0,y0) = (width-1, 0)
-		(x1,y1) = ( (width-1+wcosa) , height-1 )
-		return [get_ray(x0-j,y0,x1-j,y1) for j in range(width+wcosa)]
-	elif k <= 3*(num_proj+1)/4:
-		wcosa = int((width-1) * math.cos(alpha))
-		(x0,y0) = (width-1-wcosa, 0)
-		(x1,y1) = (width-1, height-1)
-		return [get_ray(x0-j,y0,x1-j,y1) for j in range(width-wcosa)]
+# def get_rays(k, num_proj, alpha):
+# 	if k <= (num_proj + 1) / 4:
+# 		wsina = int((width-1) * math.sin(alpha))
+# 		(x0,y0) = (0, - wsina)
+# 		(x1,y1) = (width-1,0)
+# 		return [get_ray(x0,y0+j,x1,y1+j) for j in range(height+wsina)]
+# 	elif k <= (num_proj +1) / 2:
+# 		wcosa = int((width-1) * math.cos(alpha))
+# 		(x0,y0) = (width-1, 0)
+# 		(x1,y1) = ( (width-1+wcosa) , height-1 )
+# 		return [get_ray(x0-j,y0,x1-j,y1) for j in range(width+wcosa)]
+# 	elif k <= 3*(num_proj+1)/4:
+# 		wcosa = int((width-1) * math.cos(alpha))
+# 		(x0,y0) = (width-1-wcosa, 0)
+# 		(x1,y1) = (width-1, height-1)
+# 		return [get_ray(x0-j,y0,x1-j,y1) for j in range(width-wcosa)]
+# 	else:
+# 		wsina = int((width-1) * math.sin(alpha))
+# 		(x0,y0) = (0,0)
+# 		(x1,y1) = (width-1, - wsina)
+# 		return [get_ray(x0,y0+j,x1,y1+j) for j in range(width+wsina)]
+
+def get_rays(k, num_proj):
+	if k < (num_proj) / 2:
+		z = int(k * (height-1) * 2 / (num_proj))
+		(x0,y0) = (0, 0)
+		(x1,y1) = (width-1,2*z-height+1)
+		return [get_ray(x0,y0+j,x1,y1+j) for j in range(height+height-1-z)]
+	# elif k <= (num_proj + 1) / 2:
+	# 	z = int(k * (height-1) * 2 / (num_proj))
+	# 	(x0,y0) = (width-1, 0)
+	# 	(x1,y1) = ( (width-1+z) , height-1 )
+	# 	return [get_ray(x0-j,y0,x1-j,y1) for j in range(width+z)]
 	else:
-		wsina = int((width-1) * math.sin(alpha))
-		(x0,y0) = (0,0)
-		(x1,y1) = (width-1, - wsina)
-		return [get_ray(x0,y0+j,x1,y1+j) for j in range(width+wsina)]
+		z = int((k-num_proj/2) * (height-1) * 2 / (num_proj))
+		(x0,y0) = (0,2*z- width+1)
+		(x1,y1) = (0, height-1)
+		return [get_ray(x0+j,y0,x1+j,y1) for j in range(width+width-1-z)]
+
 
 # def get_ray(k, num_proj):
 # 	if k == 0 or k == 4:
@@ -122,16 +140,15 @@ def addpixels(p, q):
 	return (rp+rq,gp+gq,bp+bq, 255)#(ap+aq)//2)
 
 # COMPUTE PROJECTIONS
-alpha = math.pi / (num_proj+1)
-
 lst_of_projections = []
 #lst_of_lst_of_rays = [get_rays(k, num_proj) for k in range(num_proj)]
-lst_of_lst_of_rays = [get_rays(k, num_proj, math.pi * k / (num_proj+1)) for k in range(num_proj)]
-lst_of_lst_of_rays = [[[(x,y) for (x,y) in ray if 0 <= x and x < width and 0 <= y and y < height] for ray in lst_of_rays] for lst_of_rays in lst_of_lst_of_rays]
-for k,lst_of_rays in enumerate(lst_of_lst_of_rays):
-	for j,ray in enumerate(lst_of_rays):
-		if len(ray) == 0:
-			print('This ray has no pixels: k=', k, 'j=', j)
+#lst_of_lst_of_rays = [get_rays(k, num_proj, math.pi * k / (num_proj+1)) for k in range(num_proj)]
+lst_of_lst_of_rays_0 = [get_rays(k, num_proj) for k in range(num_proj)]
+lst_of_lst_of_rays_1 = [[[(x,y) for (x,y) in ray if 0 <= x and x < width and 0 <= y and y < height] for ray in lst_of_rays] for lst_of_rays in lst_of_lst_of_rays_0]
+lst_of_lst_of_rays = [[ray for ray in lst_of_rays if len(ray) > 0] for lst_of_rays in lst_of_lst_of_rays_1]
+
+print('succesfully built list of rays')
+
 for k,lst_of_rays in enumerate(lst_of_lst_of_rays):
 	#alpha = get_angle(k)
 	#ray0 = get_ray(alpha, k)
@@ -150,6 +167,8 @@ for k,lst_of_rays in enumerate(lst_of_lst_of_rays):
 	# 		black
 	# 	) for j in range(get_proj_size(k))]
 	lst_of_projections.append(proj)
+
+print('calculated all projections')
 
 # for proj in lst_of_projections:
 # 	print(proj)
@@ -188,7 +207,7 @@ newimg = Image.new('RGBA', (sidelength, sidelength))
 
 
 newdata = [[(0,0,0,255) for x in range(width)] for y in range(height)]
-countpixels = [[0 for x in range(width)] for y in range(height)]
+#countpixels = [[0 for x in range(width)] for y in range(height)]
 
 for k, (lst_of_rays, proj) in enumerate(zip(lst_of_lst_of_rays, lst_of_projections)):
 	for ray,pixel in zip(lst_of_rays, proj):
@@ -197,13 +216,28 @@ for k, (lst_of_rays, proj) in enumerate(zip(lst_of_lst_of_rays, lst_of_projectio
 			#putpixel(newimg, (x,y), newpixel
 			if 0 <= x and x < width and 0 <= y and y < height:
 				newdata[y][x] = addpixels(pixel, newdata[y][x])
-				countpixels[y][x] += len(ray)
+				#countpixels[y][x] += len(ray)
 
 #newdata = [[(r//(num_proj-1), g//(num_proj-1), b//(num_proj-1), 255) for (r,g,b,a) in [newdata[y][x]] for x in range(width)] for y in range(height)]
 #newdata_aslist = [(r//(num_proj-1), g//(num_proj-1), b//(num_proj-1), 255) for row in newdata for (r,g,b,a) in row]
-newdata_aslist = [(r//num_proj, g//num_proj, b//num_proj, 255) for row,countingrow in zip(newdata,countpixels) for ((r,g,b,a),c) in zip(row,countingrow)]
+#newdata_aslist = [(r//num_proj, g//num_proj, b//num_proj, 255) for row,countingrow in zip(newdata,countpixels) for ((r,g,b,a),c) in zip(row,countingrow)]
+newdata_aslist = [(r//num_proj, g//num_proj, b//num_proj, 255) for row in newdata for (r,g,b,a) in row]
 #newimg.paste(newdata, box=(0,width,0,height))
+
+print('reconstructed image; about to renormalize variance')
+
+import statistics
+newr,newg,newb = zip(newdata_aslist)
+newmeanr,newmeang,newmeanb = (statistics.mean(l) for l in (newr,newg,newb))
+newstddevr, newstddevg,newstddevb = (statistics.stddev(l, mean) for l, mean in ((newr,newmeanr), (newg, newmeang), (newb, newmeanb)))
+
+oldlst = [img.getpixel((x,y)) for y in range(height) for x in range(width)]
+oldr,oldg,oldb = zip(oldlst)
+oldmeanr,newmeang,newmeanb = (statistics.mean(l) for l in (newr,newg,newb))
+newstddevr, newstddevg,newstddevb = (statistics.stddev(l, mean) for l, mean in ((newr,newmeanr), (newg, newmeang), (newb, newmeanb)))
+
 newimg.putdata(newdata_aslist)
+print('reconstructed image')
 # for k,(ray0, proj) in enumerate(zip(lst_of_rays, lst_of_projections)):
 # 	incrx, incry = get_incr(k)
 # 	for (x,y) in ray0:
@@ -217,11 +251,11 @@ newimg.putdata(newdata_aslist)
 # for row in countpixels:
 # 	print(row)
 
-print('pixels from reconstructed image:')
-for coord in [(0,0), (12,20), (sidelength-1,sidelength-1)]:
-	print(newimg.getpixel(coord))
+# print('pixels from reconstructed image:')
+# for coord in [(0,0), (12,20), (sidelength-1,sidelength-1)]:
+# 	print(newimg.getpixel(coord))
 newimg.save(outimgname)
-
+print('saved image as', outimgname)
 ## TODO :
 ##  - replace sum with averages
 ##  - make sure adding pixels works correctly with RGB

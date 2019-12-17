@@ -1,5 +1,25 @@
 #!/usr/bin/env python3
 
+#/***************************************************************************
+# *   Copyright (C) 2019 by Stephan Kunne                                   *
+# *   stephan.kunne@univ-nantes.fr                                          *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU General Public License as published by  *
+# *   the Free Software Foundation; either version 3 of the License, or     *
+# *   (at your option) any later version.                                   *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU General Public License for more details.                          *
+# *                                                                         *
+# *   You should have received a copy of the GNU General Public License     *
+# *   along with this program; if not, write to the                         *
+# *   Free Software Foundation, Inc.,                                       *
+# *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+# ***************************************************************************/
+
 import sys			# sys.exit()
 import pygame		# handle pygame events: interaction with user
 from time import sleep	# because infinite loops make my computer overheat
@@ -71,5 +91,3 @@ while True:
 				env.reg_img = reg_transfo.apply(rotation, translation, env.source_img, env.imgwidth, env.imgheight)
 				#reg_io.update(screen, source_img, leftrect, target_img, rightrect, reg_img, regrect)
 				env.update()#reg_io.update(env)
-
-

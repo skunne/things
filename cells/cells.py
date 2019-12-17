@@ -1,3 +1,23 @@
+#/***************************************************************************
+# *   Copyright (C) 2019 by Stephan Kunne                                   *
+# *   stephan.kunne@univ-nantes.fr                                          *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU General Public License as published by  *
+# *   the Free Software Foundation; either version 3 of the License, or     *
+# *   (at your option) any later version.                                   *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU General Public License for more details.                          *
+# *                                                                         *
+# *   You should have received a copy of the GNU General Public License     *
+# *   along with this program; if not, write to the                         *
+# *   Free Software Foundation, Inc.,                                       *
+# *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+# ***************************************************************************/
+
 import sys				# Sys.argv
 import random			# randomly initialize speeds and positions
 from math import sqrt	# normalize speeds
@@ -105,8 +125,8 @@ def get_next_colour():
 	get_next_colour.i += 1
 	get_next_colour.i = 0 if get_next_colour.i == len(get_next_colour.colours) else get_next_colour.i
 	return (get_next_colour.colours[get_next_colour.i])
-get_next_colour.colours = [(255,000,000), (255,255,000), (255,000,255), 
-							(000,255,000), (000,000,255), (000,255,255), 
+get_next_colour.colours = [(255,000,000), (255,255,000), (255,000,255),
+							(000,255,000), (000,000,255), (000,255,255),
 							(100,000,000), (000,100,000), (000,000,100), (100,200,255), ]
 get_next_colour.i = -1
 
@@ -179,7 +199,5 @@ for i in range(nb_frames - 1):
 	X,Y,VX,VY = update_cell_locations(X,Y,VX,VY)
 
 frames[0].save(filename, format='GIF', save_all=True,
-	append_images=frames[1:], 
+	append_images=frames[1:],
 	duration = 1000 // fps,)
-
-	
